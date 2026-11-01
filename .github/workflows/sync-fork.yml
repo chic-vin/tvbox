@@ -2,9 +2,9 @@ name: 每周自动同步上游源
 
 on:
   schedule:
-    # 每7天执行一次，周日凌晨2点运行
+    # 每7天周日凌晨2点执行
     - cron: '0 2 */7 * *'
-  workflow_dispatch:  # 加这个就可以在Actions页面手动点按钮运行测试
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,11 +14,20 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: 自动同步上游仓库
-        uses: repo-sync/pull-request@v2
+      - name: 拉取当前仓库代码
+        uses: actions/checkout@v4
         with:
-          source_repository: qist/tvbox
-          destination_branch: "master"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "自动同步上游源更新"
-          pr_body: "由定时工作流自动提交的同步更新"
+          ref: master
+          fetch-depth: 0
+
+      - name: 配置上游仓库地址
+        run: |
+          git remote add upstream https://github.com/qist/tvbox.git
+          git fetch upstream master
+
+      - name: 合并上游更新并推送
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git merge upstream/master --no-edit
+          git push origin master
