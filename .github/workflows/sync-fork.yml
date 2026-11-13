@@ -1,8 +1,8 @@
-name: 每周自动同步上游源
+name: 每两天自动同步上游源
 
 on:
   schedule:
-    # 每7天周日凌晨2点执行
+    # 每两天中午12点执行
     - cron: '0 12 */2 * *'
   workflow_dispatch:
 
